@@ -1,0 +1,64 @@
+
+version: '3.8'
+
+services:
+  AWBotHub:
+    image: awdress/awbothub:latest
+    container_name: AWBotHub
+    working_dir: /app
+    restart: always  # 自动重启策略
+    
+    # 卷挂载
+    volumes:
+      - ./config:/app/config              # 配置文件目录
+      - ./logs:/app/logs                  # 日志文件目录
+      - ./sessions:/app/sessions          # Telegram登录会话文件
+      - ./db_file:/app/db_file            # 数据库相关文件夹
+      - ./temp_file:/app/temp_file        # 临时文件夹
+      - ./data:/app/data                  # 游戏数据文件夹
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Docker socket（用于容器内重启）
+    
+    # 环境变量配置
+    environment:
+      - TZ=Asia/Shanghai                    # 时区设置
+      - INSTALL_SUPERVISOR=true             # 是否启用SUPERVISOR
+      - SUPERVISOR_USERNAME=admin           # SUPERVISOR用户名
+      - SUPERVISOR_PASSWORD=your_password   # SUPERVISOR密码
+      - GITHUB_TOKEN=your_github_token      # GitHub Personal Access Token
+      - http_proxy=http://your_proxy_host:port  # HTTP代理（可选）
+      - https_proxy=http://your_proxy_host:port # HTTPS代理（可选）
+    
+    # 网络配置
+    network_mode: bridge  # 内置的网关
+    
+    # 端口映射
+    ports:
+      - '51901:51901'     # Supervisord Web管理界面端口
+      - '18000:18000'     # Web 控制面板监听端口
+    
+    tty: true
+
+  # MySQL 数据库服务
+  mysql:
+    container_name: AWBotHub-mysql
+    image: mysql:8.3.0
+    restart: always
+    
+    # 数据库数据持久化
+    volumes:
+      - ./mysql:/var/lib/mysql
+    
+    # 数据库环境变量
+    environment:
+      - TZ=Asia/Shanghai                    # 时区设置
+      - MYSQL_DATABASE=tgbot                # 数据库名称
+      - MYSQL_USER=your_mysql_user          # MySQL用户名
+      - MYSQL_PASSWORD=your_mysql_password  # MySQL用户密码
+      - MYSQL_ROOT_PASSWORD=your_root_password # MySQL root密码
+    
+    # 端口映射
+    ports:
+      - 33306:3306  # MySQL数据库端口
+    
+    # 网络配置
+    network_mode: bridge  # 内置的网关
