@@ -2,6 +2,17 @@
 
 ## v2.2.7 (2026-06-26)
 
+**Web 小程序重做（完整对齐 Bot 菜单）**
+
+- 重构为「配置 Schema 驱动」：新增 `adapters/web_ui/schema.py` 声明全部可设置项（11 分组 / 160 字段 / 8 动作 / 6 动态集合），作为前后端唯一事实来源
+- 新增 `adapters/web_ui/config_service.py` 解释引擎：按字段类型严格读写 state.toml/config，类型不写坏（on/off 字符串、`[ai]` 原生布尔、数值存字符串、percent↔小数、csv/json/列表、抽奖时间段特殊格式）
+- 重写 `api.py` 为 9 个端点（schema/setting/collection/avatar/action），沿用 Telegram initData 鉴权
+- 前端按 Bot 菜单层级重写：主菜单九宫格 → 子菜单 → 设置详情，逐项即时保存
+- 覆盖 Bot 菜单全部设置：游戏/答题/抽奖/红包/朱雀/AI/功能配置/排行榜/黑名单/系统维护；config 常量只读展示
+- 动作按钮（更新/重启/导出/日志清理/卡牌回收/刷新命令）全部带二次确认
+- 自动换头像支持每账号图片池上传/清空（新增 `python-multipart` 依赖）
+- 修复 `StateManager` 缺失的 `remove_section`：整份重写实现真正删除 section（修复 Bot 删除定时回复任务时会崩的既有 bug）
+
 **天空红包：回退智能发言资格判断 + /red 命令提前占位**
 
 - 移除「消息差额 < 20 秒抢、≥ 20 等 10 秒」的逻辑及消息ID跟踪
